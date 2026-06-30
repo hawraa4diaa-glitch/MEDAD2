@@ -16,6 +16,11 @@
             --text-muted: #718096;
             --success: #28A745;
             --purple: #6B46C1;
+            
+            /* ألوان النافذة السلوكية الجديدة المستوحاة من الصورة */
+            --behavior-dark: #0D1321;
+            --behavior-green: #22C55E;
+            --behavior-blue: #38BDF8;
         }
 
         *, *::before, *::after { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -135,7 +140,7 @@
         .goal-progress-box { margin-bottom: 15px; }
         .goal-meta { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
         .progress-bar-container { background: #E2E8F0; height: 10px; border-radius: 10px; overflow: hidden; }
-        .progress-bar-fill { background: var(--success); height: 100%; width: 45%; }
+        .progress-bar-fill { background: var(--success); height: 100%; width: 45%; transition: width 0.5s ease; }
 
         .btn-action-bank { 
             background: var(--alinma-navy); 
@@ -151,6 +156,75 @@
             transition: 0.2s;
         }
         .btn-action-bank:hover { background: #001F42; border-left: 4px solid var(--alinma-gold); }
+
+        /* تصفيف بطاقة تحدي الصمود الجديدة المطابقة تماماً للصورة المعطاة */
+        .behavior-unlock-card {
+            background-color: var(--behavior-dark);
+            color: #FFFFFF;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border-right: 5px solid var(--behavior-green);
+        }
+        .behavior-unlock-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--behavior-green);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .behavior-unlock-body {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .behavior-unlock-body .highlight-amount {
+            color: #A855F7; /* لون بنفسجي للمبلغ */
+            font-weight: bold;
+        }
+        .behavior-unlock-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn-behavior-success {
+            flex: 1;
+            background-color: var(--behavior-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-behavior-success:hover { background-color: #16A34A; }
+        
+        .btn-behavior-current {
+            flex: 1;
+            background-color: var(--behavior-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-behavior-current:hover { background-color: #0EA5E9; }
     </style>
 </head>
 <body>
@@ -177,11 +251,26 @@
         <p>نظام إدارة الميزانية المرن وتتبع تحديات الصمود أمام الرغبات الاستهلاكية</p>
     </div>
 
+    <div class="behavior-unlock-card" id="behaviorChallengeCard">
+        <div class="behavior-unlock-header">
+            🔓 انتهت مدة الحجز السلوكي التلقائي! (اكتمل تحدي الصمود)
+        </div>
+        <div class="behavior-unlock-body">
+            لقد صمدت بنجاح وتجاوزت الرغبة العاطفية المؤقتة لشراء <b>"ساعة ذكية رياضية Pro"</b> وتم فك التجميد التلقائي عن مبلغ <span class="highlight-amount">750 ريال</span>.
+            <br><br>
+            <b>حدد مسار الكاش الآن بكل حكمة ومسؤولية:</b>
+        </div>
+        <div class="behavior-unlock-actions">
+            <button class="btn-behavior-success" onclick="routeCashToSavings(750)">💰 حساب المدخرات</button>
+            <button class="btn-behavior-current" onclick="routeCashToCurrent(750)">💳 المحفظة الجارية</button>
+        </div>
+    </div>
+
     <div class="accounts-grid">
         <div class="account-card">
             <div class="account-type">الحساب الجاري الأساسي</div>
             <div class="account-number">SA 43 0500 0000 1234 5678 0001</div>
-            <div class="account-balance">14,350.00 <span>ريال</span></div>
+            <div class="account-balance" id="currentBalance">14,350.00 <span>ريال</span></div>
         </div>
 
         <div class="account-card smart-feature-card">
@@ -193,7 +282,7 @@
         <div class="account-card behavior-score-card">
             <div class="account-type">✨ رصيد الوعي المالي (نقاط كفو)</div>
             <div class="account-number">مكافآت الصمود والتحكم بالاندفاع المالي</div>
-            <div class="account-balance" style="color: var(--purple);">185 <span style="color: var(--purple); font-weight: bold;">نقطة</span></div>
+            <div class="account-balance" id="kfooPoints" style="color: var(--purple);">185 <span style="color: var(--purple); font-weight: bold;">نقطة</span></div>
         </div>
     </div>
 
@@ -235,12 +324,12 @@
             <div class="goal-progress-box">
                 <div class="goal-meta">
                     <span><b>شراء بلايستيشن 5 برو</b></span>
-                    <span style="color: var(--success); font-weight: bold;">45%</span>
+                    <span style="color: var(--success); font-weight: bold;" id="goalPercent">45%</span>
                 </div>
                 <div class="progress-bar-container">
-                    <div class="progress-bar-fill"></div>
+                    <div class="progress-bar-fill" id="goalBar"></div>
                 </div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: left;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: left;" id="goalTargetText">
                     تم توفير: 1,350 ريال من أصل 3,000 ريال
                 </div>
             </div>
@@ -260,6 +349,12 @@
 </div>
 
 <script>
+// متغيرات لتسهيل الحسابات البرمجية داخل الصفحة
+let currentBalanceAmount = 14350;
+let savingsBalanceAmount = 1350;
+let kfooPointsAmount = 185;
+const targetAmount = 3000;
+
 // محاكاة العداد التنازلي التلقائي للحجز السلوكي
 function startBankTimer() {
     let hours = 23;
@@ -288,14 +383,53 @@ function startBankTimer() {
     }, 1000);
 }
 
+// دالة لتحديث واجهة مؤشر الارتفاع في الادخار تلقائياً
+function updateGoalUI() {
+    let percentage = Math.min(Math.round((savingsBalanceAmount / targetAmount) * 100), 100);
+    document.getElementById('goalPercent').innerText = percentage + '%';
+    document.getElementById('goalBar').style.width = percentage + '%';
+    document.getElementById('goalTargetText').innerText = `تم توفير: ${savingsBalanceAmount.toLocaleString()} ريال من أصل ${targetAmount.toLocaleString()} ريال`;
+}
+
+// 1. خيار توجيه الكاش إلى حساب المدخرات (المستوحى من زر الصورة الأخضر)
+function routeCashToSavings(amount) {
+    savingsBalanceAmount += amount;
+    kfooPointsAmount += 50; // مكافأة إضافية لدعم الادخار
+    
+    document.getElementById('savingsBalance').innerHTML = `${savingsBalanceAmount.toLocaleString()}.00 <span>ريال</span>`;
+    document.getElementById('kfooPoints').innerHTML = `${kfooPointsAmount} <span style="color: var(--purple); font-weight: bold;">نقطة</span>`;
+    
+    updateGoalUI();
+    
+    // إخفاء البطاقة بتأثير بصري بعد اتخاذ القرار
+    document.getElementById('behaviorChallengeCard').style.display = 'none';
+    alert("🎯 اختيار ذكي! تم تحويل مبلغ 750 ريال إلى حساب الادخار بنجاح، وحصلت على +50 نقطة كفو الإضافية لتنمية وعيك المالي.");
+}
+
+// 2. خيار توجيه الكاش إلى المحفظة الجارية (المستوحى من زر الصورة الأزرق)
+function routeCashToCurrent(amount) {
+    currentBalanceAmount += amount;
+    
+    document.getElementById('currentBalance').innerHTML = `${currentBalanceAmount.toLocaleString()}.00 <span>ريال</span>`;
+    
+    document.getElementById('behaviorChallengeCard').style.display = 'none';
+    alert("💳 تم إعادة توجيه مبلغ 750 ريال إلى محفظتك الجارية بنجاح لتكون متاحة للاستخدام الحكيم.");
+}
+
 function simulateManualSaving() {
-    let currentBalance = 1350;
-    currentBalance += 100;
-    document.getElementById('savingsBalance').innerHTML = `${currentBalance.toLocaleString()}.00 <span>ريال</span>`;
+    currentBalanceAmount -= 100;
+    savingsBalanceAmount += 100;
+    
+    document.getElementById('currentBalance').innerHTML = `${currentBalanceAmount.toLocaleString()}.00 <span>ريال</span>`;
+    document.getElementById('savingsBalance').innerHTML = `${savingsBalanceAmount.toLocaleString()}.00 <span>ريال</span>`;
+    
+    updateGoalUI();
     alert("🎯 تم تحويل 100 ريال بنجاح من حسابك الجاري إلى حساب مدخرات الهدف المالي!");
 }
 
+// بدء التشغيل
 startBankTimer();
+updateGoalUI();
 </script>
 
 </body>
